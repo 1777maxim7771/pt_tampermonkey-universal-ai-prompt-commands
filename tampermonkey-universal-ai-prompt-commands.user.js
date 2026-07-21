@@ -1,42 +1,55 @@
 // ==UserScript==
 // @name         Tampermonkey Universal AI Prompt Commands PT
 // @namespace    local.tampermonkey.universal.ai.prompt.commands.pt
-// @version      1.0.0
-// @description  Substitui comandos curtos PT1-PT10 por prompts de IA prontos em chats de inteligência artificial.
+// @version      1.1.0
+// @description  Versão portuguesa: substitui os acionadores universais Q1-Q10 por prompts de IA prontos para chats de IA
 // @author       1777maxim7771
 // @match        *://*/*
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
 
-(function () {
-    'use strict';
-
-    // Versão portuguesa. Apenas um comando exato é substituído por um prompt completo.
-    const COMMANDS = {
-        'PT1': `Traduza o texto fornecido para português de forma completa e precisa. Preserve o sentido, a ordem das informações, nomes, datas, valores, números de documentos, organizações e formulações importantes. Não acrescente conclusões próprias e não reduza o conteúdo.`,
-        'PT2': `Resuma o texto fornecido em português de acordo com o sentido e o contexto. Explique do que se trata, quem escreve a quem, qual é o assunto principal e quais pedidos, decisões, datas, prazos, valores ou detalhes importantes são mencionados.`,
-        'PT3': `Crie em português um resumo temático muito curto desta carta, estritamente em uma única linha. Indique remetente, assunto, o que é comunicado ou solicitado e quais datas, prazos, valores, documentos ou ações são importantes.`,
-        'PT4': `Traduza o texto fornecido para alemão simples e compreensível, nível A2-B1. Formule o texto de modo educado, oficial e gramaticalmente correto. Preserve sentido, nomes, datas, valores, endereços, organizações e detalhes importantes.`,
-        'PT5': `Corrija o texto português fornecido. Torne-o gramaticalmente correto, claro, lógico e natural, mantendo o sentido original. Remova erros, repetições e formulações inadequadas. Não acrescente fatos ausentes do texto original.`,
-        'PT6': `Escreva uma resposta curta, educada e oficial a esta carta em português. Responda ao conteúdo de forma concreta, sem frases desnecessárias. Se necessário, confirme o recebimento, peça esclarecimentos, mencione documentos ou comunique as informações solicitadas.`,
-        'PT7': `Explique em português, com palavras simples, o que este texto significa. Analise o contexto, quem escreve, para quem, sobre qual assunto, o que é solicitado, o que deve ser feito e quais datas, prazos, valores, documentos ou condições são importantes.`,
-        'PT8': `Extraia do texto todos os fatos importantes e organize-os em português. Indique separadamente pessoas, organizações, endereços, datas, prazos, valores, números de documentos, exigências, decisões, obrigações, documentos mencionados e próximos passos. Não invente informações.`,
-        'PT9': `Crie em português uma lista clara de ações necessárias com base neste texto. Indique o que fazer, quais documentos preparar, a quem responder, onde se dirigir, quais prazos respeitar e a que pontos prestar atenção. Ordene as ações por prioridade.`,
-        'PT10': `Redija com base no texto fornecido uma carta oficial e educada em alemão simples, nível A2-B1. Preserve nomes, datas, valores, endereços, organizações, números de documentos e circunstâncias. Estruture a carta com saudação, breve explicação, pedido principal e encerramento. Termine com: Mit freundlichen Grüßen`
-    };
-
-    const EDITABLE_SELECTORS = ['textarea', 'input[type="text"]', 'input[type="search"]', '[contenteditable="true"]', '[contenteditable="plaintext-only"]', '[role="textbox"]'];
-    function isEditableElement(element) { if (!element || !element.matches) return false; if (element.disabled || element.readOnly) return false; const tagName = element.tagName ? element.tagName.toLowerCase() : ''; const inputType = (element.getAttribute('type') || '').toLowerCase(); if (tagName === 'input' && !['text', 'search'].includes(inputType)) return false; return EDITABLE_SELECTORS.some(selector => element.matches(selector)); }
-    function findEditableElement(target) { if (!target) return null; if (isEditableElement(target)) return target; if (target.closest) { const element = target.closest(EDITABLE_SELECTORS.join(',')); if (isEditableElement(element)) return element; } return null; }
-    function getText(element) { const tagName = element.tagName ? element.tagName.toLowerCase() : ''; return tagName === 'textarea' || tagName === 'input' ? element.value || '' : element.innerText || element.textContent || ''; }
-    function normalizeCommand(text) { return String(text || '').trim().replace(/\s+/g, '').toUpperCase(); }
-    function dispatchInputEvents(element, text) { try { element.dispatchEvent(new InputEvent('input', { bubbles: true, cancelable: true, inputType: 'insertReplacementText', data: text })); } catch (error) { element.dispatchEvent(new Event('input', { bubbles: true })); } element.dispatchEvent(new Event('change', { bubbles: true })); }
-    function setCursorToEnd(element) { element.focus(); if ('selectionStart' in element) { const length = element.value.length; element.setSelectionRange(length, length); return; } const range = document.createRange(); const selection = window.getSelection(); range.selectNodeContents(element); range.collapse(false); selection.removeAllRanges(); selection.addRange(range); }
-    function replaceText(element, newText) { const tagName = element.tagName ? element.tagName.toLowerCase() : ''; element.focus(); if (tagName === 'textarea' || tagName === 'input') { element.value = newText; } else { try { const range = document.createRange(); const selection = window.getSelection(); range.selectNodeContents(element); selection.removeAllRanges(); selection.addRange(range); document.execCommand('insertText', false, newText); } catch (error) { element.textContent = newText; } } setCursorToEnd(element); dispatchInputEvents(element, newText); }
-    function showNotification(message) { const oldBox = document.getElementById('tm-ai-prompt-commands-notification'); if (oldBox) oldBox.remove(); const box = document.createElement('div'); box.id = 'tm-ai-prompt-commands-notification'; box.textContent = message; box.style.cssText = 'position:fixed;right:20px;bottom:20px;z-index:999999;background:#111;color:#fff;padding:12px 18px;border-radius:10px;font:14px Arial,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.35);max-width:420px;line-height:1.4'; document.body.appendChild(box); setTimeout(() => box.remove(), 2200); }
-    function checkAndReplace(target) { const editable = findEditableElement(target); if (!editable) return; const command = normalizeCommand(getText(editable)); if (!Object.prototype.hasOwnProperty.call(COMMANDS, command)) return; replaceText(editable, COMMANDS[command]); showNotification(`Comando ${command} substituído por um prompt de IA pronto`); }
-    document.addEventListener('input', event => setTimeout(() => checkAndReplace(event.target), 20), true);
-    document.addEventListener('keyup', event => setTimeout(() => checkAndReplace(event.target), 20), true);
-    document.addEventListener('paste', event => setTimeout(() => checkAndReplace(event.target), 50), true);
+(function(){'use strict';
+/* Objetivo: acelerar o trabalho com ChatGPT, Gemini, Claude, Copilot e outros chats de IA. Q1-Q10 são acionadores universais e podem ser alterados para palavras ou frases próprias. */
+const COMMANDS={
+'Q1':`Traduza o texto fornecido completa e exatamente para português.
+Preserve o significado, a ordem das informações, nomes, datas, valores, números de documentos, nomes de organizações e formulações importantes.
+Não adicione conclusões próprias, não encurte o texto e não altere o conteúdo.`,
+'Q2':`Resuma o texto fornecido em português de acordo com seu significado e contexto.
+Explique sobre o que é o texto, quem escreve para quem, qual é o assunto principal e quais requisitos, pedidos, decisões, datas, prazos, valores ou detalhes importantes são mencionados.`,
+'Q3':`Faça um resumo temático curto da carta em português, estritamente em uma única linha.
+Indique o remetente, o assunto, o que é comunicado ou solicitado e quais datas, prazos, valores, documentos ou ações são importantes.`,
+'Q4':`Traduza o texto fornecido para alemão simples e compreensível, nível A2-B1.
+O texto deve ser educado, oficial e gramaticalmente correto.
+Preserve o significado original, datas, nomes, valores, endereços, organizações e detalhes importantes.`,
+'Q5':`Corrija o texto em português fornecido.
+Torne-o gramaticalmente correto, claro e lógico, mantendo o significado original.
+Remova erros, repetições, formulações inadequadas e partes demasiado informais.
+Não adicione fatos que não estejam no texto original.`,
+'Q6':`Escreva uma resposta curta, educada e oficial a esta carta em português.
+A resposta deve ser clara e direta, sem frases desnecessárias.
+Se for necessário confirmar recebimento, esclarecer documentos, pedir explicação ou comunicar informação, formule corretamente.`,
+'Q7':`Explique em português, com palavras simples, o que este texto significa.
+Analise o contexto: quem escreve, sobre qual assunto, o que é solicitado, o que deve ser feito e quais prazos, datas, valores, documentos ou condições são importantes.`,
+'Q8':`Extraia todos os fatos importantes do texto fornecido e organize-os em português.
+Indique separadamente: pessoas, organizações, endereços, datas, prazos, valores, números de documentos, requisitos, decisões, obrigações, documentos mencionados e próximos passos.
+Não invente informações. Se algo estiver ausente, escreva: não indicado.`,
+'Q9':`Crie em português uma lista clara das ações que devem ser realizadas com base neste texto.
+Determine o que fazer, quais documentos preparar, a quem responder, onde entrar em contato, quais prazos respeitar e a que prestar atenção.
+Divida as ações por prioridade: urgente, importante, pode ser feito depois.`,
+'Q10':`Redija uma carta oficial educada em alemão com base no texto fornecido.
+A carta deve ser simples, clara e correta, nível A2-B1.
+Preserve todos os fatos importantes: nomes, datas, valores, endereços, organizações, números de documentos e circunstâncias.
+Termine com: Mit freundlichen Grüßen`};
+const S=['textarea','input[type="text"]','input[type="search"]','[contenteditable="true"]','[contenteditable="plaintext-only"]','[role="textbox"]'];
+function ie(e){if(!e||!e.matches)return false;if(e.disabled||e.readOnly)return false;const t=e.tagName?e.tagName.toLowerCase():'';const y=(e.getAttribute('type')||'').toLowerCase();if(t==='input'&&!['text','search'].includes(y))return false;return S.some(s=>e.matches(s));}
+function fe(t){if(!t)return null;if(ie(t))return t;if(t.closest){const e=t.closest(S.join(','));if(ie(e))return e;}return null;}
+function gt(e){const t=e.tagName?e.tagName.toLowerCase():'';return(t==='textarea'||t==='input')?(e.value||''):(e.innerText||e.textContent||'');}
+function nc(x){return String(x||'').trim().replace(/\s+/g,'').toUpperCase();}
+function end(e){e.focus();const t=e.tagName?e.tagName.toLowerCase():'';if(t==='textarea'||t==='input'){const l=e.value.length;e.setSelectionRange(l,l);return;}const r=document.createRange(),s=window.getSelection();r.selectNodeContents(e);r.collapse(false);s.removeAllRanges();s.addRange(r);}
+function ev(e,text){try{e.dispatchEvent(new InputEvent('input',{bubbles:true,cancelable:true,inputType:'insertReplacementText',data:text}));}catch(_){e.dispatchEvent(new Event('input',{bubbles:true}));}e.dispatchEvent(new Event('change',{bubbles:true}));}
+function rt(e,text){const t=e.tagName?e.tagName.toLowerCase():'';e.focus();if(t==='textarea'||t==='input'){e.value=text;end(e);ev(e,text);return;}try{const r=document.createRange(),s=window.getSelection();r.selectNodeContents(e);s.removeAllRanges();s.addRange(r);document.execCommand('insertText',false,text);}catch(_){e.textContent=text;}end(e);ev(e,text);}
+function note(m){const o=document.getElementById('tampermonkey-universal-ai-prompt-commands-notification');if(o)o.remove();const b=document.createElement('div');b.id='tampermonkey-universal-ai-prompt-commands-notification';b.textContent=m;b.style.cssText='position:fixed;right:20px;bottom:20px;z-index:999999;background:#111;color:#fff;padding:12px 18px;border-radius:10px;font:14px Arial,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.35)';document.body.appendChild(b);setTimeout(()=>b.remove(),2200);}
+function cr(t){const e=fe(t);if(!e)return;const c=nc(gt(e));if(!Object.prototype.hasOwnProperty.call(COMMANDS,c))return;rt(e,COMMANDS[c]);note(`Acionador ${c} substituído por um prompt de IA pronto`);}
+document.addEventListener('input',e=>setTimeout(()=>cr(e.target),20),true);document.addEventListener('keyup',e=>setTimeout(()=>cr(e.target),20),true);document.addEventListener('paste',e=>setTimeout(()=>cr(e.target),50),true);
 })();
