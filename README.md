@@ -1,129 +1,114 @@
 # Tampermonkey Universal AI Prompt Commands PT
 
-**Tampermonkey Universal AI Prompt Commands PT** é um userscript para a extensão **Tampermonkey**. Ele ajuda a trabalhar mais rapidamente com chats de inteligência artificial como ChatGPT, Gemini, Claude, Copilot e outros sites com campos de texto.
+Versão portuguesa de um script Tampermonkey para trabalhar mais rápido com chats de inteligência artificial.
 
-O script substitui comandos curtos como `PT1`, `PT3` ou `PT10` por prompts de IA longos e já preparados.
-
----
+O script substitui os acionadores universais `Q1–Q10` por prompts de IA preparados. Estes acionadores não estão ligados a nenhum idioma: o usuário pode trocar `Q1`, `Q2` e os outros por palavras, comandos ou frases próprias.
 
 ## Para que serve
 
-Serve para inserir rapidamente prompts prontos para tradução, resumo, análise de cartas, extração de fatos, respostas oficiais e redação de textos.
-
----
+Serve para inserir rapidamente prompts em ChatGPT, Gemini, Claude, Copilot e outros chats de IA. Em vez de escrever sempre uma instrução longa, basta digitar `Q1` e o script insere o prompt completo.
 
 ## Como funciona
 
-Se um campo de entrada contiver exatamente um comando conhecido, por exemplo:
+O script observa o campo de texto ativo. Se todo o conteúdo do campo corresponder exatamente a um dos acionadores `Q1–Q10`, ele é substituído pelo prompt preparado.
 
 ```text
-PT1
+Q1
 ```
 
-esse comando será substituído por um prompt completo. Texto comum não é alterado.
+é substituído por um prompt de tradução para português.
 
----
+```text
+Q8
+```
 
-## Exemplos
+é substituído por um prompt para extrair fatos importantes.
 
-- `PT1` — tradução precisa para português.
-- `PT3` — resumo temático de uma carta em uma linha.
-- `PT8` — extração de datas, valores, pessoas, organizações e documentos.
-- `PT10` — carta oficial em alemão simples A2-B1.
+Texto normal não é alterado. Por exemplo, `Q1 outro texto` não será substituído.
 
----
+## Acionadores personalizados
+
+Os acionadores podem ser alterados no código, no objeto `COMMANDS`.
+
+```javascript
+'Q1': `...`
+```
+
+pode virar:
+
+```javascript
+'TRADUZIR': `...`
+```
+
+`Q1–Q10` são apenas os acionadores universais padrão.
 
 ## Onde usar
 
-ChatGPT, Google Gemini, Claude, Microsoft Copilot e outros sites com campos de texto.
+- ChatGPT
+- Google Gemini
+- Claude
+- Microsoft Copilot
+- outros sites com campo de texto
+
+O script contém:
 
 ```javascript
 // @match        *://*/*
 ```
 
-O script funciona em vários sites, mas substitui apenas comandos exatos.
+## Requisito antes da instalação
 
----
+A extensão **Tampermonkey** deve estar instalada no navegador. O script é instalado no Tampermonkey, não no GitHub e não em um site específico. O GitHub serve apenas para armazenar o arquivo `.user.js`.
 
-## Antes da instalação
+## Instalação rápida
 
-Instale primeiro a extensão **Tampermonkey** no navegador. Ela permite instalar e executar scripts `.user.js`.
-
----
-
-## Instalação rápida via Raw
-
-1. Instale Tampermonkey.
-2. Abra este link Raw:
+1. Instale o Tampermonkey.
+2. Abra o link Raw:
 
 ```text
 https://raw.githubusercontent.com/1777maxim7771/pt_tampermonkey-universal-ai-prompt-commands/main/tampermonkey-universal-ai-prompt-commands.user.js
 ```
 
 3. Confirme a instalação no Tampermonkey.
-4. Teste `PT1` em um chat de IA.
-
----
+4. Abra um chat de IA e digite `Q1`.
 
 ## Instalação pelo GitHub
 
-Abra `tampermonkey-universal-ai-prompt-commands.user.js`, clique em **Raw** e confirme no Tampermonkey.
-
----
+Abra o arquivo `tampermonkey-universal-ai-prompt-commands.user.js`, clique em **Raw** e confirme a instalação no Tampermonkey.
 
 ## Importar por URL
 
-Tampermonkey → Dashboard → Utilities → Import from URL → cole o link Raw.
-
----
+No Tampermonkey, abra **Dashboard → Utilities → Import from URL**, cole o link Raw e confirme.
 
 ## Instalação manual
 
-Tampermonkey → Create a new script → remova o modelo → cole o conteúdo do `.user.js` → salve com **Ctrl + S**.
-
----
+Crie um novo script no Tampermonkey, cole o código do arquivo `.user.js` e salve.
 
 ## Por que o Tampermonkey reconhece o script
 
-Pelo cabeçalho `// ==UserScript==` e pela extensão `.user.js`. O script é instalado no **Tampermonkey**, não no GitHub nem em um site específico.
+O Tampermonkey reconhece o cabeçalho `// ==UserScript==` e a extensão `.user.js`.
 
----
+## Comandos padrão
 
-## Comandos
-
-- `PT1` — tradução para português.
-- `PT2` — resumo em português.
-- `PT3` — resumo de carta em uma linha.
-- `PT4` — tradução para alemão A2-B1.
-- `PT5` — correção de texto em português.
-- `PT6` — resposta oficial curta.
-- `PT7` — explicação simples.
-- `PT8` — extração de fatos importantes.
-- `PT9` — lista de ações necessárias.
-- `PT10` — carta oficial em alemão.
-
----
+- `Q1` — tradução para português.
+- `Q2` — resumo do texto.
+- `Q3` — resumo de uma carta em uma linha.
+- `Q4` — tradução para alemão simples A2-B1.
+- `Q5` — correção de texto em português.
+- `Q6` — resposta oficial curta.
+- `Q7` — explicação simples do texto.
+- `Q8` — extração de fatos importantes.
+- `Q9` — lista de ações necessárias.
+- `Q10` — carta oficial em alemão.
 
 ## Verificação
 
-Digite `PT1`. Se for substituído por um prompt completo, o script funciona.
+Digite `Q1` em um chat de IA. Se o script funcionar, `Q1` será substituído pelo prompt completo.
 
----
+## Possíveis problemas
 
-## Problemas possíveis
-
-Verifique se Tampermonkey e o script estão ativados, se a página foi atualizada e se o comando foi escrito sozinho.
-
----
-
-## Arquivo do script
-
-```text
-tampermonkey-universal-ai-prompt-commands.user.js
-```
-
----
+Verifique se o script está ativado, se a página foi recarregada, se `Q1` foi digitado sem texto adicional, se o Tampermonkey tem permissão no site e se o cursor está em um campo editável.
 
 ## Objetivo do projeto
 
-Acelerar o trabalho repetitivo com chats de IA usando comandos curtos que inserem prompts completos.
+Acelerar o trabalho repetitivo com chats de IA: tradução, resumo, análise de cartas, respostas oficiais e processamento de documentos.
